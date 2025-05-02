@@ -13,11 +13,13 @@ dependencies:
     - torchvision>=0.20.1
     - torchaudio>=2.5.1
     - lightning
+    #TODO: change with the desired CUDA version
 
-    # TODO: change with the desired CUDA version
     # CUDA is not allowed only on MACOS
-    - pytorch-cuda=11.8
+    - pytorch-cuda=11.8 # [win]
+    - pytorch-cuda=11.8 # [linux]
 
+    - hydra-core
     - pandas
     - matplotlib
     - seaborn
