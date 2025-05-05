@@ -1,0 +1,9 @@
+lightning
+hydra-core
+pandas
+matplotlib
+seaborn
+jupyterlab
+ipykernel
+wandb
+numpy

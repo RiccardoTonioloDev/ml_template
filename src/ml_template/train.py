@@ -1,14 +1,61 @@
+from ml_template.models.module import BinaryClassifier
+from ml_template.data.datamodule import DataModule
 from omegaconf import OmegaConf, DictConfig
-from ml_template.data import *
-from models import *
+from hydra.utils import instantiate
+from typing import Optional
 
-import pytorch_lightning as pl
+import lightning as L
 import hydra
+import os
 
 
-@hydra.main(config_path="../../conf", config_name="config",version_base=None)
+@hydra.main(config_path="./conf", config_name="config", version_base=None)
 def train(cfg: DictConfig) -> None:
-    print("Used config: ", OmegaConf.to_yaml(cfg))
+    print(
+        "############################### CONFIGURATION ###############################"
+    )
+    print(OmegaConf.to_yaml(cfg, resolve=True))
+    print(
+        "#############################################################################"
+    )
+    print(
+        f"Hydra Runtime Output Directory: {hydra.core.hydra_config.HydraConfig.get().runtime.output_dir}"
+    )
+    print(
+        "#############################################################################"
+    )
+    checkpoints_dir = os.path.join(".", "checkpoints")
+    if not os.path.isdir(checkpoints_dir):
+        os.mkdir(checkpoints_dir)
+
+    seed: Optional[int] = cfg.get("seed")
+    datamodule = DataModule(**cfg.datamodule)
+    # TODO: use your custom LightningModule
+    module = BinaryClassifier(**cfg.module)
+
+    if seed:
+        L.seed_everything(seed, workers=True)
+
+    trainer: L.Trainer = instantiate(cfg.trainer)
+
+    if cfg.get("run_fit", True):
+        trainer.fit(model=module, datamodule=datamodule)
+    if cfg.get("run_test", True):
+        ckpt_path: Optional[str] = None
+        if cfg.get("test_ckpt_path", None):
+            ckpt_path = cfg.test_ckpt_path
+        if cfg.get("run_fit", True):
+            ckpt_path = "best"
+        if ckpt_path is None:
+            print("TEST SKIPPED: no training was done and no checkpoint was provided.")
+        else:
+            test_results = trainer.test(
+                model=module, datamodule=datamodule, ckpt_path=ckpt_path
+            )
+            monitor_metric = cfg.monitor_metric
+            optimized_metric = test_results[0].get(monitor_metric)
+            return optimized_metric
+
 
 if __name__ == "__main__":
     train()

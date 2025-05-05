@@ -1,0 +1,5 @@
+_target_: lightning.pytorch.loggers.WandbLogger
+project: ${project_name}
+name: ${experiment_name}
+log_model: True
+save_dir: '.'
