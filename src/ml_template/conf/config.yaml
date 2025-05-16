@@ -1,5 +1,6 @@
 experiment_name: 'experiment_name_${now:%Y%m%d_%H%M%S}'
-project_name: 'project_name'
+project_name: 'ml_template'
+dev_org_name: 'RiccardoTonioloDev'
 seed: 42
 
 defaults:

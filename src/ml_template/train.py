@@ -1,7 +1,10 @@
+from lightning.pytorch.callbacks import ModelCheckpoint
 from ml_template.models.module import BinaryClassifier
 from ml_template.data.datamodule import DataModule
 from omegaconf import OmegaConf, DictConfig
 from hydra.utils import instantiate
+from huggingface_hub import HfApi
+from dotenv import load_dotenv
 from typing import Optional
 
 import lightning as L
@@ -45,7 +48,21 @@ def train(cfg: DictConfig) -> None:
         if cfg.get("test_ckpt_path", None):
             ckpt_path = cfg.test_ckpt_path
         if cfg.get("run_fit", True):
-            ckpt_path = "best"
+            primary_checkpoint_cb = trainer.checkpoint_callback
+            if isinstance(primary_checkpoint_cb, ModelCheckpoint):
+                if hasattr(primary_checkpoint_cb, "best_model_path"):
+                    ckpt_path = primary_checkpoint_cb.best_model_path
+                    load_dotenv()
+                    token = os.getenv("HF_TOKEN")
+                    api = HfApi(token=token)
+                    repo_id = f"{cfg.dev_org_name}/{cfg.project_name}"
+                    base_repo_path = f"checkpoints/{cfg.experiment_name}.ckpt"
+                    api.upload_file(
+                        path_or_fileobj=ckpt_path,
+                        path_in_repo=base_repo_path,
+                        repo_id=repo_id,
+                        repo_type="model",
+                    )
         if ckpt_path is None:
             print("TEST SKIPPED: no training was done and no checkpoint was provided.")
         else:

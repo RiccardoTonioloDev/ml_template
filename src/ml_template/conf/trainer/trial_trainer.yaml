@@ -8,19 +8,19 @@ callbacks:
       mode: 'max'
       save_top_k: 1
       filename: 'best-acc-{epoch:02d}'
-      dirpath: 'checkpoints'
+      dirpath: ${hydra:runtime.output_dir}/checkpoints
     - _target_: lightning.pytorch.callbacks.ModelCheckpoint
       monitor: 'val/epoch_rec'
       mode: 'max'
       save_top_k: 1
       filename: 'best-rec-{epoch:02d}'
-      dirpath: 'checkpoints'
+      dirpath: ${hydra:runtime.output_dir}/checkpoints
     - _target_: lightning.pytorch.callbacks.ModelCheckpoint
       monitor: 'val/epoch_prec'
       mode: 'max'
       save_top_k: 1
       filename: 'best-prec-{epoch:02d}'
-      dirpath: 'checkpoints'
+      dirpath: ${hydra:runtime.output_dir}/checkpoints
 _target_: lightning.pytorch.Trainer
 max_epochs: 2
 accelerator: 'auto'
