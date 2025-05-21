@@ -27,6 +27,7 @@ def train(cfg: DictConfig) -> None:
     print(
         "#############################################################################"
     )
+    cfg = cfg.experiment
     checkpoints_dir = os.path.join(".", "checkpoints")
     if not os.path.isdir(checkpoints_dir):
         os.mkdir(checkpoints_dir)

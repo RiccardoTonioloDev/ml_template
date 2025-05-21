@@ -1,5 +1,5 @@
 defaults:
-    - dataset: dummy_dataset
+    - /dataset: dummy_dataset
 
 train_val_test:
     - 0.8
@@ -27,4 +27,4 @@ eval_data_augs_config:
           std: [0.229, 0.224, 0.225]
 train_label_augs_config: null
 eval_label_augs_config: null
-random_seed: ${seed}
+random_seed: ${experiment.seed}
