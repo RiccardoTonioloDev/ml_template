@@ -14,3 +14,9 @@ A repository template for machine learning projects, following conventions and b
     -   `.gitignore` keeps the repository clean.
     -   `Makefile` simplifies repetitive commands.
     -   `.pre-commit-config.yaml` automatically executes linting and formatting before every commit, keeping code consistent.
+
+# TODOS:
+
+-   [ ] Transform defaults in `default_classifiy` and `default_segment`;
+    -   [ ] Add the segmentation defaults;
+-   [ ] Improve readme;

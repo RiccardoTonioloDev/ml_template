@@ -2,6 +2,7 @@ defaults:
     - /model: dummy_model
     - /optimizer: adam
     - /scheduler: on_plateau
+    - /weight_initializer: xavier
     - _self_
 
 # TARGET DOESN'T GO HERE, WE ARE NOT INSTATIATING THE MODULE DYNAMICALLY

@@ -9,7 +9,6 @@ defaults:
     - /datamodule: default
     - _self_
 
-#TODO: fix this (loss minimizing, accuracy maximizing)
 monitor_metric: 'test/epoch_acc'
 run_fit: true
 run_test: true

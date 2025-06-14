@@ -1,11 +1,6 @@
-"""
-The sole purpose of this file is to contain a general lightning datamodule structure, engineered to be configured
-entirely using Hydra.
-"""
-
 from torch.utils.data import random_split, DataLoader, Dataset
+from ml_template.data.components import AugmentImageData
 from torchvision.transforms.v2 import Transform
-from ml_template.data.components import Augment
 from typing import Optional, Tuple, cast
 from hydra.utils import instantiate
 from omegaconf import DictConfig
@@ -25,8 +20,6 @@ class DataModule(L.LightningDataModule):
         persistent_workers=True,
         train_data_augs_config: Optional[DictConfig] = None,
         eval_data_augs_config: Optional[DictConfig] = None,
-        train_label_augs_config: Optional[DictConfig] = None,
-        eval_label_augs_config: Optional[DictConfig] = None,
         random_seed=42,
     ):
         super().__init__()
@@ -42,8 +35,6 @@ class DataModule(L.LightningDataModule):
         self.data_test: Optional[Dataset] = None
         self.train_data_augs: Optional[Transform] = None
         self.eval_data_augs: Optional[Transform] = None
-        self.train_label_augs: Optional[Transform] = None
-        self.eval_label_augs: Optional[Transform] = None
 
     def setup(self, stage):
         # Dataset creation
@@ -66,31 +57,19 @@ class DataModule(L.LightningDataModule):
             self.eval_data_augs = cast(
                 Transform, instantiate(self.hparams.eval_data_augs_config)
             )
-        if self.train_label_augs is None and self.hparams.train_label_augs_config:
-            self.train_label_augs = cast(
-                Transform, instantiate(self.hparams.train_label_augs_config)
-            )
-        if self.eval_label_augs is None and self.hparams.eval_label_augs_config:
-            self.eval_label_augs = cast(
-                Transform, instantiate(self.hparams.eval_label_augs_config)
-            )
         if stage in ("fit", "validate", None):
-            self.val_set = Augment(
-                dataset=self.data_val,
-                for_data=self.eval_data_augs,
-                for_labels=self.eval_label_augs,
+            self.val_set = AugmentImageData(
+                dataset=self.data_val, transforms=self.eval_data_augs
             )
         if stage in ("fit", None):
-            self.train_set = Augment(
+            self.train_set = AugmentImageData(
                 dataset=self.data_train,
-                for_data=self.train_data_augs,
-                for_labels=self.train_label_augs,
+                transforms=self.train_data_augs,
             )
         if stage in ("test", None):
-            self.test_set = Augment(
+            self.test_set = AugmentImageData(
                 dataset=self.data_test,
-                for_data=self.eval_data_augs,
-                for_labels=self.eval_label_augs,
+                transforms=self.eval_data_augs,
             )
 
     def train_dataloader(self):

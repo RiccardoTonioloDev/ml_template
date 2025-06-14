@@ -33,13 +33,13 @@ def train(cfg: DictConfig) -> None:
         os.mkdir(checkpoints_dir)
 
     seed: Optional[int] = cfg.get("seed")
-    datamodule = DataModule(**cfg.datamodule)
-    # TODO: use your custom LightningModule
-    module = BinaryClassifier(**cfg.module)
 
     if seed:
         L.seed_everything(seed, workers=True)
 
+    datamodule = DataModule(**cfg.datamodule)
+    # TODO: use your custom LightningModule
+    module = BinaryClassifier(**cfg.module)
     trainer: L.Trainer = instantiate(cfg.trainer)
 
     if cfg.get("run_fit", True):
@@ -49,21 +49,23 @@ def train(cfg: DictConfig) -> None:
         if cfg.get("test_ckpt_path", None):
             ckpt_path = cfg.test_ckpt_path
         if cfg.get("run_fit", True):
-            primary_checkpoint_cb = trainer.checkpoint_callback
-            if isinstance(primary_checkpoint_cb, ModelCheckpoint):
-                if hasattr(primary_checkpoint_cb, "best_model_path"):
-                    ckpt_path = primary_checkpoint_cb.best_model_path
-                    load_dotenv()
-                    token = os.getenv("HF_TOKEN")
-                    api = HfApi(token=token)
-                    repo_id = f"{cfg.dev_org_name}/{cfg.project_name}"
-                    base_repo_path = f"checkpoints/{cfg.experiment_name}.ckpt"
-                    api.upload_file(
-                        path_or_fileobj=ckpt_path,
-                        path_in_repo=base_repo_path,
-                        repo_id=repo_id,
-                        repo_type="model",
-                    )
+            # UNCOMMENT THIS FOR THE HUGGING FACE INTEGRATION
+            # primary_checkpoint_cb = trainer.checkpoint_callback
+            # if isinstance(primary_checkpoint_cb, ModelCheckpoint):
+            #     if hasattr(primary_checkpoint_cb, "best_model_path"):
+            #         ckpt_path = primary_checkpoint_cb.best_model_path
+            #         load_dotenv()
+            #         token = os.getenv("HF_TOKEN")
+            #         api = HfApi(token=token)
+            #         repo_id = f"{cfg.dev_org_name}/{cfg.project_name}"
+            #         base_repo_path = f"checkpoints/{cfg.experiment_name}.ckpt"
+            #         api.upload_file(
+            #             path_or_fileobj=ckpt_path,
+            #             path_in_repo=base_repo_path,
+            #             repo_id=repo_id,
+            #             repo_type="model",
+            #         )
+            ckpt_path = "best"
         if ckpt_path is None:
             print("TEST SKIPPED: no training was done and no checkpoint was provided.")
         else:
