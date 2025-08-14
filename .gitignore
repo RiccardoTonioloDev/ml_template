@@ -180,8 +180,7 @@ cython_debug/
 *.pt
 *.ckpt
 *.pth.tar
-
-.env
+*.onnx
 
 wandb
 

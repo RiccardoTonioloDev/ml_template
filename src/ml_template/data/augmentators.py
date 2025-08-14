@@ -1,9 +1,9 @@
 from torchvision.transforms import functional as f
-from torchvision.transforms import v2 as t
+from torchvision.transforms import v2 as transforms
 from typing import Tuple, List
 from torch import Tensor
 
-import torchvision.tv_tensors as TV
+import torchvision.tv_tensors as tv
 import random
 import torch
 
@@ -13,10 +13,10 @@ class Clip:
         self.lb = lower_bound
         self.ub = upper_bound
 
-    def __call__(self, *args: Tuple[Tensor]) -> Tuple[Tensor]:
+    def __call__(self, *args: Tensor) -> Tuple[Tensor, ...]:
         tens: List[Tensor] = []
         for t in args:
-            if isinstance(t, TV.Image):
+            if isinstance(t, tv.Image):
                 t = t.clip(self.lb, self.ub)
             tens.append(t)
         return tuple(tens)
@@ -26,32 +26,13 @@ class RandomRotate90:
     def __init__(self):
         self.angles = [90, 180, 270]
 
-    def __call__(self, *args: Tuple[Tensor]) -> Tuple[Tensor]:
+    def __call__(self, *args: Tensor) -> Tuple[Tensor, ...]:
         tens: List[Tensor] = []
         choosen_angle_index = random.randint(0, len(self.angles) - 1)
         for t in args:
             tens.append(f.rotate(t, self.angles[choosen_angle_index]))
         return tuple(tens)
 
-
-class RandomElasticTransform:
-    def __init__(self, p=0.5, alpha=50, sigma=5):
-        self.transform = t.ElasticTransform(alpha, sigma)
-        self.p = p
-
-    def __call__(self, *args: Tuple[Tensor]) -> Tuple[Tensor]:
-        apply_transform = random.random() < self.p
-        return self.transform(args) if apply_transform else args
-
-
-class RandomGaussianNoise:
-    def __init__(self, p=0.5, mean=0, sigma=0.005, clip=False):
-        self.transform = t.GaussianNoise(mean=mean, sigma=sigma, clip=clip)
-        self.p = p
-
-    def __call__(self, *args: Tuple[Tensor]) -> Tuple[Tensor]:
-        apply_transform = random.random() < self.p
-        return self.transform(args) if apply_transform else args
 
 
 class ChannelDivider:
@@ -68,10 +49,10 @@ class ChannelDivider:
             extracted_channels_list.append(x)
         return torch.concat(extracted_channels_list, dim=0)
 
-    def __call__(self, *args):
+    def __call__(self, *args: Tensor) -> Tuple[Tensor, ...]:
         tens: List[Tensor] = []
         for t in args:
-            if not isinstance(t, TV.Mask):
+            if not isinstance(t, tv.Mask):
                 t = self.divide_channels(t)
             tens.append(t)
         return tuple(tens)

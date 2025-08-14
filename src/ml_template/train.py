@@ -4,7 +4,6 @@ from ml_template.data.datamodule import DataModule
 from omegaconf import OmegaConf, DictConfig
 from hydra.utils import instantiate
 from huggingface_hub import HfApi
-from dotenv import load_dotenv
 from typing import Optional
 
 import lightning as L
